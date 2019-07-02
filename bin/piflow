@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+function help_info () {
+  echo "Usage:"
+  echo ""
+  flow_help
+  echo ""
+  group_help
+  echo ""
+  project_help
+}
+
+function flow_help () {
+  echo "        piflow  flow            start   [ ***.json ]"
+  echo "                                stop    [ appId ]"
+  echo "                                info    [ appId ]"
+  echo "                                log     [ appId ]"
+}
+
+function group_help () {
+  echo "                flowGroup       start   [ ***.json ]"
+  echo "                                stop    [ groupId ]"
+  echo "                                info    [ groupId ]"
+}
+
+function project_help () {
+  echo "                project         start   [ ***.json ]"
+  echo "                                stop    [ projectId ]"
+  echo "                                info    [ projectId ]"
+}
+
+function flow_process () {
+  if [ $# -eq 2 ]
+  then
+    case "$1" in
+      start)
+        flow_start $2 
+        ;;
+      stop)
+        flow_stop $2 
+        ;;
+      info)
+        flow_info $2 
+        ;;
+      *)
+        flow_help
+        break
+        ;;
+    esac
+  else
+    echo $1
+    flow_help
+  fi 
+}
+
+function flow_start () {
+  echo "Flow Start !!!!!!!!!!!"
+  #content=file_reader $1
+  content=$1
+  curl_command="curl -0 -X POST http://10.0.86.191:8002/flow/start -H \"Content-type: application/json\" -d '$1'"
+  echo $curl_command
+  ret=eval `$curl_command`
+  return ${ret}"\n"
+}
+
+function file_reader () {
+ 
+  content="" 
+  while read line
+  do
+    echo ${line}
+    #$content=${content}${line}
+  done  < $1 
+  return $content
+}
+
+SERVICE=""
+if [ $# -gt 0 ]; then 
+  case "$1" in 
+    flow)
+      SERVICE=flow
+      ;; 
+    flowGroup)
+      SERVICE=flowGroup
+      ;;
+    project)
+      SERVICE=project
+      ;;
+    *)
+      break
+      ;;
+  esac
+fi
+
+if [[ $SERVICE = "" ]]
+then
+  help_info
+
+elif [[ $SERVICE = flow ]]
+then 
+  echo "Flow process!!!!!!!!"
+  flow_process $2 $3
+
+else
+  help_info
+fi
