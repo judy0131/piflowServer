@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 function help_info () {
   echo "Usage:"
   echo ""
@@ -58,8 +58,7 @@ function flow_start () {
   content=$1
   curl_command="curl -0 -X POST http://10.0.86.191:8002/flow/start -H \"Content-type: application/json\" -d '$1'"
   echo $curl_command
-  ret=eval `$curl_command`
-  return ${ret}"\n"
+  eval $curl_command
 }
 
 function file_reader () {
