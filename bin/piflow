@@ -1,4 +1,6 @@
 #!/bin/bash
+SERVER="10.0.86.191"
+PORT="8002"
 function help_info () {
   echo "Usage:"
   echo ""
@@ -41,9 +43,11 @@ function flow_process () {
       info)
         flow_info $2 
         ;;
+      log)
+        flow_log $2
+        ;;
       *)
         flow_help
-        break
         ;;
     esac
   else
@@ -53,24 +57,53 @@ function flow_process () {
 }
 
 function flow_start () {
-  echo "Flow Start !!!!!!!!!!!"
+  echo "Flow Start:"
   #content=file_reader $1
-  content=$1
-  curl_command="curl -0 -X POST http://10.0.86.191:8002/flow/start -H \"Content-type: application/json\" -d '$1'"
-  echo $curl_command
+  content=$(file_reader $1)
+  curl_command="curl -0 -X POST http://$SERVER:$PORT/flow/start -H \"Content-type: application/json\" -d '$content'"
+  #echo $curl_command
+  eval $curl_command
+}
+
+function flow_info () {
+  echo "Flow Info:"
+  curl_command="curl -Get http://$SERVER:$PORT/flow/info?appID=$1"
+  #echo $curl_command
+  eval $curl_command
+}
+
+function flow_stop () {
+  echo "Flow Stop:"
+  curl_command="curl -POST http://$SERVER:$PORT/flow/stop -H \"Content-type: application/json\" -d '{\"appID\":\"$1\"}'"
+  #echo $curl_command
+  eval $curl_command
+}
+
+function flow_log () { 
+  echo "Flow Log:" 
+  curl_command="curl -GET http://$SERVER:$PORT/flow/log?appID=$1" 
+  #echo $curl_command
   eval $curl_command
 }
 
 function file_reader () {
- 
-  content="" 
-  while read line
+  #bak=$IFS
+  content=""
+  if [ ! -f "$1" ];then
+   echo "the $1 is not a file"
+   exit
+  fi
+  #IFS="\t"
+  while read line  
   do
-    echo ${line}
-    #$content=${content}${line}
-  done  < $1 
-  return $content
+     #echo "$line"
+     content=`echo -e "${content}\n${line}"`
+  done < "$1"
+  echo $content
+  #IFS=$bak
 }
+
+#file_reader $1
 
 SERVICE=""
 if [ $# -gt 0 ]; then 
@@ -85,7 +118,6 @@ if [ $# -gt 0 ]; then
       SERVICE=project
       ;;
     *)
-      break
       ;;
   esac
 fi
@@ -96,9 +128,13 @@ then
 
 elif [[ $SERVICE = flow ]]
 then 
-  echo "Flow process!!!!!!!!"
-  flow_process $2 $3
-
+  #echo "Flow process!!!!!!!!"
+  #flow_process $2 $3
+  echo "$(flow_process $2 $3 2>/dev/null)"
+  #`echo -e "${ret}\n"`  
+  
 else
   help_info
 fi
+
+
