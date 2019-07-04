@@ -60,6 +60,7 @@ function flow_start () {
   echo "Flow Start:"
   #content=file_reader $1
   content=$(file_reader $1)
+  echo "$content"
   curl_command="curl -0 -X POST http://$SERVER:$PORT/flow/start -H \"Content-type: application/json\" -d '$content'"
   #echo $curl_command
   eval $curl_command
@@ -82,6 +83,96 @@ function flow_stop () {
 function flow_log () { 
   echo "Flow Log:" 
   curl_command="curl -GET http://$SERVER:$PORT/flow/log?appID=$1" 
+  #echo $curl_command
+  eval $curl_command
+}
+
+function group_process () {
+  if [ $# -eq 2 ]
+  then
+    case "$1" in
+      start)
+        group_start $2
+        ;;
+      stop)
+        group_stop $2
+        ;;
+      info)
+        group_info $2
+        ;;
+      *)
+        group_help
+        ;;
+    esac
+  else
+    echo $1
+    group_help
+  fi
+}
+
+function group_start () {
+  echo "Group Start:"
+  content=$(file_reader $1)
+  echo "$content"
+  curl_command="curl -0 -X POST http://$SERVER:$PORT/flowGroup/start -H \"Content-type: application/json\" -d '$content'"
+  eval $curl_command
+}
+
+function group_info () {
+  echo "Group Info:"
+  curl_command="curl -Get http://$SERVER:$PORT/flowGroup/info?groupId=$1"
+  echo $curl_command
+  eval $curl_command
+}
+
+function group_stop () {
+  echo "Group Stop:"
+  curl_command="curl -POST http://$SERVER:$PORT/flowGroup/stop -H \"Content-type: application/json\" -d '{\"groupId\":\"$1\"}'"
+  #echo $curl_command
+  eval $curl_command
+}
+
+function project_process () {
+  if [ $# -eq 2 ]
+  then
+    case "$1" in
+      start)
+        project_start $2
+        ;;
+      stop)
+        project_stop $2
+        ;;
+      info)
+        project_info $2
+        ;;
+      *)
+        group_help
+        ;;
+    esac
+  else
+    echo $1
+    group_help
+  fi
+}
+
+function project_start () {
+  echo "Project Start:"
+  content=$(file_reader $1)
+  echo "$content"
+  curl_command="curl -0 -X POST http://$SERVER:$PORT/project/start -H \"Content-type: application/json\" -d '$content'"
+  eval $curl_command
+}
+
+function project_info () {
+  echo "Project Info:"
+  curl_command="curl -Get http://$SERVER:$PORT/project/info?projectId=$1"
+  #echo $curl_command
+  eval $curl_command
+}
+
+function project_stop () {
+  echo "Project Stop:"
+  curl_command="curl -POST http://$SERVER:$PORT/project/stop -H \"Content-type: application/json\" -d '{\"projectId\":\"$1\"}'"
   #echo $curl_command
   eval $curl_command
 }
@@ -128,10 +219,15 @@ then
 
 elif [[ $SERVICE = flow ]]
 then 
-  #echo "Flow process!!!!!!!!"
-  #flow_process $2 $3
   echo "$(flow_process $2 $3 2>/dev/null)"
-  #`echo -e "${ret}\n"`  
+
+elif [[ $SERVICE = flowGroup ]]
+then
+  echo "$(group_process $2 $3 2>/dev/null)"
+
+elif [[ $SERVICE = project ]]
+then
+  echo "$(project_process $2 $3 2>/dev/null)"
   
 else
   help_info
