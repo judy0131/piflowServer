@@ -1,6 +1,15 @@
 #!/bin/bash
-SERVER="10.0.86.191"
-PORT="8002"
+CONFIG_PATH="$PIFLOW_HOME/config.properties"
+SERVER=""
+PORT=""
+
+function server_info_init () {
+  SERVER=`sed '/^server.ip=/!d;s/.*=//' $CONFIG_PATH`
+  PORT=`sed '/^server.port=/!d;s/.*=//' $CONFIG_PATH`
+  echo $SERVER
+  echo $PORT
+}
+
 function help_info () {
   echo "Usage:"
   echo ""
@@ -196,41 +205,50 @@ function file_reader () {
 
 #file_reader $1
 
-SERVICE=""
+#SERVICE=""
+
+#init server info: Ip and Port
+server_info_init
+
+# run command: flow、group and project
 if [ $# -gt 0 ]; then 
   case "$1" in 
     flow)
-      SERVICE=flow
+      #SERVICE=flow
+      echo "$(flow_process $2 $3 2>/dev/null)"
       ;; 
     flowGroup)
-      SERVICE=flowGroup
+      #SERVICE=flowGroup
+      echo "$(group_process $2 $3 2>/dev/null)"
       ;;
     project)
-      SERVICE=project
+      #SERVICE=project
+      echo "$(project_process $2 $3 2>/dev/null)"
       ;;
     *)
+      help_info
       ;;
   esac
 fi
 
-if [[ $SERVICE = "" ]]
-then
-  help_info
-
-elif [[ $SERVICE = flow ]]
-then 
-  echo "$(flow_process $2 $3 2>/dev/null)"
-
-elif [[ $SERVICE = flowGroup ]]
-then
-  echo "$(group_process $2 $3 2>/dev/null)"
-
-elif [[ $SERVICE = project ]]
-then
-  echo "$(project_process $2 $3 2>/dev/null)"
-  
-else
-  help_info
-fi
+#if [[ $SERVICE = "" ]]
+#then
+#  help_info
+#
+#elif [[ $SERVICE = flow ]]
+#then 
+#  echo "$(flow_process $2 $3 2>/dev/null)"
+#
+#elif [[ $SERVICE = flowGroup ]]
+#then
+#  echo "$(group_process $2 $3 2>/dev/null)"
+#
+#elif [[ $SERVICE = project ]]
+#then
+#  echo "$(project_process $2 $3 2>/dev/null)"
+#  
+#else
+#  help_info
+#fi
 
 
