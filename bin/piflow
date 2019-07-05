@@ -6,8 +6,6 @@ PORT=""
 function server_info_init () {
   SERVER=`sed '/^server.ip=/!d;s/.*=//' $CONFIG_PATH`
   PORT=`sed '/^server.port=/!d;s/.*=//' $CONFIG_PATH`
-  echo $SERVER
-  echo $PORT
 }
 
 function help_info () {
@@ -69,7 +67,7 @@ function flow_start () {
   echo "Flow Start:"
   #content=file_reader $1
   content=$(file_reader $1)
-  echo "$content"
+  #echo "$content"
   curl_command="curl -0 -X POST http://$SERVER:$PORT/flow/start -H \"Content-type: application/json\" -d '$content'"
   #echo $curl_command
   eval $curl_command
